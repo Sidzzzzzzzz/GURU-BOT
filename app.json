@@ -4,6 +4,17 @@
   "repository": "https://github.com/Guru322/GURU-BOT",
   "logo": "https://i.imgur.com/gEj1qC6.jpeg",
   "keywords": ["bot", "whatsapp", "whatsapp-bot", "rpg", "GURU-bot-md", "GURU-bot"],
+   "env": {
+    "OPENAI_API_KEY": {
+      "description": "openai key",
+      "required": false,
+      "value": "lol"
+    },
+    "OPENAI_ORGANIZATION": {
+      "description": "openai org id",
+      "required": false,
+      "value": "null"
+    },
   "buildpacks": [
     {
       "url": "heroku/nodejs"
