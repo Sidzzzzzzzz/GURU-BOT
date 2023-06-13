@@ -15,7 +15,7 @@
       "value": "null"
     }
   }
-}
+},
   "buildpacks": [
     {
       "url": "heroku/nodejs"
