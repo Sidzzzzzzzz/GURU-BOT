@@ -2,8 +2,6 @@ import fetch from 'node-fetch'
 import { sticker } from '../lib/sticker.js'
 
 let handler = async (m, { conn, text }) => {
-  let userPfp;
-
   try {
     if (!text && !m.quoted) {
       m.react('❔');
@@ -13,16 +11,7 @@ let handler = async (m, { conn, text }) => {
     let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
     if (!(who in global.db.data.users)) throw '✳️ The user is not found in my database'
 
-    userPfp = './src/avatar_contact.png'; // Ensure the fallback image exists in the right directory
-    // Fetch profile picture
-    try {
-      let vcard = 'vcard' + who.split('@')[0] + '.vcf'
-      vcard = await conn.getProfilePicture(who)
-      userPfp = vcard
-    } catch (e) {
-      console.error(e);
-    }
-
+    let userPfp = 'https://i.imgur.com/8B4jwGq.jpeg'; // Set the userPfp URL
     let user = global.db.data.users[who]
     let { name } = global.db.data.users[who]
 
@@ -60,18 +49,19 @@ let handler = async (m, { conn, text }) => {
     });
 
     let json = await res.json();
-   if (json.ok) {
-  let bufferImage = Buffer.from(json.result.image, 'base64');
-  let stickerr = await sticker(false, bufferImage, global.packname, global.author);
-  await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
-} else {
-  console.error("API response was not ok. Error: ", json.error);
-  throw new Error(`API response was not ok. Error: ${json.error}`);
-}
+    if (json.ok) {
+      let bufferImage = Buffer.from(json.result.image, 'base64');
+      let stickerr = await sticker(false, bufferImage, global.packname, global.author);
+      await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
+    } else {
+      console.error("API response was not ok. Error: ", json.error);
+      throw new Error(`API response was not ok. Error: ${json.error}`);
+    }
 
     m.react("🤡");
   } catch (e) {
-    m.react("😭")
+    m.react("😭");
+    console.error("Error:", e);
   } 
 }
 handler.help = ['quote'];
