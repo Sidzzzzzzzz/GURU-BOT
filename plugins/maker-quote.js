@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import { sticker } from '../lib/sticker.js'
 
 let handler = async (m, { conn, text }) => {
-  let userPfp;
+  let userPfp = 'https://i.imgur.com/8B4jwGq.jpeg'; // Set the userPfp to the specified image
 
   try {
     if (!text && !m.quoted) {
@@ -12,18 +12,6 @@ let handler = async (m, { conn, text }) => {
 
     let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
     if (!(who in global.db.data.users)) throw '✳️ The user is not found in my database'
-    try {
-      userPfp = await conn.profilePictureUrl(who, 'image')
-      // Add a validation to check if the URL is valid
-      try {
-        new URL(userPfp);
-      } catch (_) {
-        throw new Error("Invalid URL for profile picture");
-      }
-    } catch (e) {
-      console.error(e);
-      userPfp = './src/avatar_contact.png'; // Ensure the fallback image  exists in the right directory
-    }
 
     let user = global.db.data.users[who]
     let { name } = global.db.data.users[who]
