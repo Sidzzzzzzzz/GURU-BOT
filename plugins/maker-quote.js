@@ -1,5 +1,6 @@
-import fetch from 'node-fetch'
-import { sticker } from '../lib/sticker.js'
+import fetch from 'node-fetch';
+import { sticker } from '../lib/sticker.js';
+import fs from 'fs';
 
 let handler = async (m, { conn, text }) => {
   try {
@@ -8,20 +9,20 @@ let handler = async (m, { conn, text }) => {
       return m.reply(`Please provide a text (Type or mention a message)!`);
     }
 
-    let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
-    if (!(who in global.db.data.users)) throw '✳️ The user is not found in my database'
+    let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender;
+    if (!(who in global.db.data.users)) throw '✳️ The user is not found in my database';
 
     let userPfp = 'https://i.imgur.com/8B4jwGq.jpeg'; // Set the userPfp URL
-    let user = global.db.data.users[who]
-    let { name } = global.db.data.users[who]
+    let user = global.db.data.users[who];
+    let { name } = global.db.data.users[who];
 
     m.react(rwait);
-    let quoteText = m.quoted ? m.quoted.msg : text ? text : "";
+    let quoteText = m.quoted ? m.quoted.msg : text ? text : '';
 
     let quoteJson = {
-      type: "quote",
-      format: "png",
-      backgroundColor: "#FFFFFF",
+      type: 'quote',
+      format: 'png',
+      backgroundColor: '#FFFFFF',
       width: 1800,
       height: 200, // Adjust the height value as desired
       scale: 2,
@@ -50,20 +51,25 @@ let handler = async (m, { conn, text }) => {
 
     let json = await res.json();
     if (json.ok) {
-      let bufferImage = Buffer.from(json.result.image, 'base64');
-      let stickerr = await sticker(false, bufferImage, global.packname, global.author);
-      await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
+      let imageBuffer = Buffer.from(json.result.image, 'base64');
+      let tempFilePath = './temp/image.png';
+      fs.writeFileSync(tempFilePath, imageBuffer);
+
+      await conn.sendFile(m.chat, tempFilePath, 'quote.png', '', m);
+
+      fs.unlinkSync(tempFilePath);
     } else {
-      console.error("API response was not ok. Error: ", json.error);
+      console.error('API response was not ok. Error:', json.error);
       throw new Error(`API response was not ok. Error: ${json.error}`);
     }
 
-    m.react("🤡");
+    m.react('🤡');
   } catch (e) {
-    m.react("😭");
-    console.error("Error:", e);
-  } 
-}
+    m.react('😭');
+    console.error('Error:', e);
+  }
+};
+
 handler.help = ['quote'];
 handler.tags = ['fun'];
 handler.command = ['quote'];
