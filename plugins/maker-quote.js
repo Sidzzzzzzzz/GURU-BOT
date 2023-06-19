@@ -49,15 +49,17 @@ const handler = async (m, { conn, text }) => {
       headers: { 'Content-Type': 'application/json' },
     });
 
-    const buffer = await res.arrayBuffer();
-    const bufferImage = Buffer.from(buffer);
+    const json = await res.json();
+    if (!json.ok) throw '✳️ The API request was not successful';
+
+    const bufferImage = Buffer.from(json.result.image, 'base64');
     
     const stickerr = await sticker(false, bufferImage, global.packname, global.author);
     await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
     m.react('🤡');
   } catch (e) {
     console.error(e); // This will print the error message and its stack trace
-    m.react('🤡');
+    m.react('😭');
   }
 };
 
@@ -66,3 +68,4 @@ handler.tags = ['fun'];
 handler.command = ['quote'];
 
 export default handler;
+
