@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 import { sticker } from '../lib/sticker.js';
-import fs from 'fs';
 
 let handler = async (m, { conn, text }) => {
   try {
@@ -52,12 +51,11 @@ let handler = async (m, { conn, text }) => {
     let json = await res.json();
     if (json.ok) {
       let imageBuffer = Buffer.from(json.result.image, 'base64');
-      let tempFilePath = './temp/image.png';
-      fs.writeFileSync(tempFilePath, imageBuffer);
 
-      await conn.sendFile(m.chat, tempFilePath, 'quote.png', '', m);
+      await conn.sendMessage(m.chat, imageBuffer, 'image/png', { quoted: m });
 
-      fs.unlinkSync(tempFilePath);
+      m.reply('Here is the quote as an image.');
+
     } else {
       console.error('API response was not ok. Error:', json.error);
       throw new Error(`API response was not ok. Error: ${json.error}`);
