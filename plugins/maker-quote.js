@@ -12,17 +12,15 @@ let handler = async (m, { conn, text }) => {
 
     let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
     if (!(who in global.db.data.users)) throw '✳️ The user is not found in my database'
+
+    userPfp = './src/avatar_contact.png'; // Ensure the fallback image exists in the right directory
+    // Fetch profile picture
     try {
-      userPfp = await conn.profilePictureUrl(who, 'image')
-      // Add a validation to check if the URL is valid
-      try {
-        new URL(userPfp);
-      } catch (_) {
-        throw new Error("Invalid URL for profile picture");
-      }
+      let vcard = 'vcard' + who.split('@')[0] + '.vcf'
+      vcard = await conn.getProfilePicture(who)
+      userPfp = vcard
     } catch (e) {
       console.error(e);
-      userPfp = './src/avatar_contact.png'; // Ensure the fallback image  exists in the right directory
     }
 
     let user = global.db.data.users[who]
@@ -61,8 +59,8 @@ let handler = async (m, { conn, text }) => {
       headers: { 'Content-Type': 'application/json' },
     });
 
-   let json = await res.json();
-if (json.ok) {
+    let json = await res.json();
+   if (json.ok) {
   let bufferImage = Buffer.from(json.result.image, 'base64');
   let stickerr = await sticker(false, bufferImage, global.packname, global.author);
   await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
@@ -73,7 +71,7 @@ if (json.ok) {
 
     m.react("🤡");
   } catch (e) {
-    m.react("🤡")
+    m.react("😭")
   } 
 }
 handler.help = ['quote'];
