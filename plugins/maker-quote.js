@@ -55,8 +55,10 @@ let handler = async (m, { conn, text }) => {
     await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
     m.react("🤡");
   } catch (e) {
-    m.react("😭")
-  } 
+  console.error(e); // This will print the error message and its stack trace
+  m.react("🤡")
+} 
+
 }
 handler.help = ['quote'];
 handler.tags = ['fun'];
