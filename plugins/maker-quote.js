@@ -52,9 +52,7 @@ let handler = async (m, { conn, text }) => {
     if (json.ok) {
       let imageBuffer = Buffer.from(json.result.image, 'base64');
 
-      await conn.sendMessage(m.chat, imageBuffer, 'image/png', { quoted: m });
-
-      m.reply('Here is the quote as an image.');
+      await conn.sendFile(m.chat, imageBuffer, 'quote.png', 'Here is the quote as an image.', m);
 
     } else {
       console.error('API response was not ok. Error:', json.error);
