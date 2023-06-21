@@ -1,5 +1,8 @@
-import fetch from 'node-fetch'
-import { sticker } from '../lib/sticker.js'
+import fetch from 'node-fetch';
+import { sticker, support } from '../lib/sticker.js';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 let handler = async (m, { conn, text }) => {
   let userPfp = 'https://i.imgur.com/8B4jwGq.jpeg'; // use this as the default profile picture
@@ -10,11 +13,11 @@ let handler = async (m, { conn, text }) => {
       return m.reply(`Please provide a text (Type or mention a message)!`);
     }
 
-    let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
-    if (!(who in global.db.data.users)) throw '✳️ The user is not found in my database'
-    
-    let user = global.db.data.users[who]
-    let { name } = global.db.data.users[who]
+    let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender;
+    if (!(who in global.db.data.users)) throw '✳️ The user is not found in my database';
+
+    let user = global.db.data.users[who];
+    let { name } = global.db.data.users[who];
 
     m.react(rwait);
     let quoteText = m.quoted ? m.quoted.msg : text ? text : "";
@@ -50,24 +53,30 @@ let handler = async (m, { conn, text }) => {
     });
 
     let json = await res.json();
-    if(json.ok) {
-        let bufferImage = Buffer.from(json.result.image, 'base64');
-        let stickerr = await sticker(false, bufferImage, global.packname, global.author);
-        await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
-        m.react("🤡");
-    } else {
-        throw '✳️ Error while creating the sticker'
-    }
-    
+    let bufferImage = Buffer.from(json.result.image, 'base64');
+
+    // Save the bufferImage to a file
+    let tempImagePath = path.join(os.tmpdir(), 'tempImage.png');
+    fs.writeFileSync(tempImagePath, bufferImage);
+
+    // Then pass the file's path to the sticker function
+    let stickerr = await sticker(false, tempImagePath, global.packname, global.author);
+
+    await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
+    m.react("🤡");
+
+    // Delete the temp file after using
+    fs.unlinkSync(tempImagePath);
+
   } catch (e) {
     console.error(e);
-    m.react("😭")
-  } 
-}
+    m.react("😭");
+  }
+};
+
 handler.help = ['quote'];
 handler.tags = ['fun'];
 handler.command = ['quote'];
 
 export default handler;
-
 
