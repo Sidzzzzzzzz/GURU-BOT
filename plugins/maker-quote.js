@@ -50,10 +50,15 @@ let handler = async (m, { conn, text }) => {
     });
 
     let json = await res.json();
-    let bufferImage = Buffer.from(json.result.image, 'base64');
-    let stickerr = await sticker(false, bufferImage, global.packname, global.author);
-    await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
-    m.react("🤡");
+    if(json.ok) {
+        let bufferImage = Buffer.from(json.result.image, 'base64');
+        let stickerr = await sticker(false, bufferImage, global.packname, global.author);
+        await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
+        m.react("🤡");
+    } else {
+        throw '✳️ Error while creating the sticker'
+    }
+    
   } catch (e) {
     console.error(e);
     m.react("😭")
