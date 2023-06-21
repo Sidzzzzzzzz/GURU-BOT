@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import { sticker } from '../lib/sticker.js'
 
 let handler = async (m, { conn, text }) => {
-  let userPfp;
+  let userPfp = 'https://i.imgur.com/8B4jwGq.jpeg'; // use this as the default profile picture
 
   try {
     if (!text && !m.quoted) {
@@ -13,11 +13,6 @@ let handler = async (m, { conn, text }) => {
     let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
     if (!(who in global.db.data.users)) throw '✳️ The user is not found in my database'
     
-    userPfp = await conn.profilePictureUrl(who, 'image').catch((e) => {
-      console.error("Error fetching profile picture URL:", e);
-      return 'https://i.imgur.com/8B4jwGq.jpeg'; // return default URL if fetching profile picture URL fails
-    });
-
     let user = global.db.data.users[who]
     let { name } = global.db.data.users[who]
 
@@ -69,4 +64,5 @@ handler.tags = ['fun'];
 handler.command = ['quote'];
 
 export default handler;
+
 
