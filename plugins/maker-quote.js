@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { sticker, support } from '../lib/sticker.js';
+import { support, sticker } from '../lib/sticker.js';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -59,14 +59,13 @@ let handler = async (m, { conn, text }) => {
     let tempImagePath = path.join(os.tmpdir(), 'tempImage.png');
     fs.writeFileSync(tempImagePath, bufferImage);
 
-    // Then pass the file's path to the sticker function
-    let stickerr = await sticker(false, tempImagePath, global.packname, global.author);
-
-    await conn.sendFile(m.chat, stickerr, 'sticker.webp', '', m, { asSticker: true });
-    m.react("🤡");
+    // Send the image as a file
+    await conn.sendFile(m.chat, tempImagePath, 'quote.png', 'Here is the quote image:', m);
 
     // Delete the temp file after using
     fs.unlinkSync(tempImagePath);
+
+    m.react("🤡");
 
   } catch (e) {
     console.error(e);
